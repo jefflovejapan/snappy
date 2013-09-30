@@ -1,0 +1,4 @@
+In order to make the necessary requests to the camera, snappy uses [Requests][1].
+
+[1]: http://docs.python-requests.org/en/latest/
+
