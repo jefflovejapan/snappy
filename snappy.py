@@ -4,7 +4,7 @@ import sys, requests, cmd, json, os
 from bs4 import BeautifulSoup
 
 
-class snappyPrompt(cmd.Cmd):
+class SnappyPrompt(cmd.Cmd):
 
 	#defining attributes
 	url = ''
@@ -69,7 +69,7 @@ def get_description():
 
 
 #Gets the action list URL from the XML the camera provides
-def GetURL(xml):
+def get_url(xml):
 
 	#The search string needs to be lower case
 	alu = xml.find('av:x_scalarwebapi_actionlist_url')
@@ -79,7 +79,7 @@ def GetURL(xml):
 		raise Exception('The camera isn\'t supplying a URL')
 
 #Gets the list of services available from the XML the camera provides
-def GetServices(xml):
+def get_services(xml):
 	services = xml.find_all('av:x_scalarwebapi_servicetype')
 	if services:
 		return services
@@ -92,13 +92,13 @@ def main():
 	xml = BeautifulSoup(description.content)
 
 	#Getting theActionListURL --- Need this to send commands to the camera
-	actionListURL = GetURL(xml)
+	action_list_url = get_url(xml)
 	#Need these too
-	services = [i.text for i in GetServices(xml)]
+	services = [i.text for i in get_services(xml)]
 
-	if actionListURL != None	and services != None:
-		prompt = snappyPrompt()
-		prompt.url = actionListURL
+	if action_list_url != None	and services != None:
+		prompt = SnappyPrompt()
+		prompt.url = action_list_url
 		prompt.services = services
 		prompt.cmdloop()
 
