@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 
 class SnappyPrompt(cmd.Cmd):
-    #defining attributes
+    #defining attributes so I can reference them from main
     url = ''
     services = []
     ns_error = '*** Not supported by this camera'
@@ -36,29 +36,48 @@ class SnappyPrompt(cmd.Cmd):
             print self.ns_error
         else:
             target_url = ''.join([self.url, '/', self.camera_str])
-            print target_url
             command_dict = {'method': 'getSupportedSelfTimer', 'params': [],
+                            'id': 1, 'version': '1.0'}
+            command_json = json.dumps(command_dict)
+            r = requests.post(target_url, command_json)
+            response_dict = json.loads(r.text)
+            timer_choices = str(response_dict.get('result')[0])
+
+            while True:
+                s = raw_input(' '.join(['How many seconds? ',
+                                        str(timer_choices), ' ']))
+                if s in timer_choices:
+                    break
+
+            #Camera throws a fit here -- "Illegal JSON". Sony's
+            #documentation woefully incomplete.
+            command_dict = {'method': 'setSelfTimer', 'params': [int(s)],
+                            'id': 1, 'version': '1.0'}
+            command_json = json.dumps(command_dict)
+            print command_json
+            r = requests.post(target_url, command_dict)
+            print r.text
+
+    def do_liveview(self, input_string):
+        if (self.camera_str not in self.services):
+            print self.ns_error
+        else:
+            target_url = ''.join([self.url, '/', self.camera_str])
+            command_dict = {'method': 'startLiveview', 'params': [],
                             'id': 1, 'version': '1.0'}
             command_json = json.dumps(command_dict)
             r = requests.post(target_url, command_json)
 
             #loads the json string into a python dictionary
             response_dict = json.loads(r.text)
-            timer_choices = str(response_dict.get('result')[0])
+            stream_url = str(response_dict.get('result')[0])
 
-            print timer_choices
-
-            while True:
-                s = raw_input(' '.join(['How many seconds? ',
-                                        str(timer_choices)]))
-                if s in timer_choices:
-                    break
-
-            command_dict = {'method': 'setSelfTimer', 'params': [s],
-                            'id': 1, 'version': '1.0'}
-            command_json = json.dumps(command_dict)
-            r = requests.post(target_url, command_dict)
-            print r.text
+            #unfinished implementation -- need to turn this streaming
+            #data into jpegs (video?)
+            r = requests.get(stream_url, stream=True)
+            for line in r.iter_lines():
+                if line:
+                    print line
 
 
 def open_result(url_string):
