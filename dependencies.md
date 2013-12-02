@@ -1,3 +1,5 @@
+##Dependencies
+
 In order to make the necessary requests to the camera, snappy uses the following modules:
 
 - [Beautiful Soup][1]
