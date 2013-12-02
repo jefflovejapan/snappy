@@ -123,7 +123,7 @@ def main():
         prompt.cmdloop()
 
     if description is None:
-        print 'Couldn\t get doc'
+        print 'Couldn\'t get doc'
 
 if __name__ == '__main__':
     main()
